@@ -23,7 +23,24 @@ class MainService(rpyc.Service):
             with open('metadata_worker_per_file', 'wb') as metadata:
                 self.metadata_worker_per_file = pickle.load(metadata)
         
-    def exposed_
+    def exposed_threaded_search_file(self, file_name, search_query):
+        # process querys preventing multiple simultaneous query
+        # each query will use all servers with all cores
+        # one by one to avoid overloading
+        pass
+
+    def exposed_distribute_file_chunks(self):
+        # divide file in chunks and send the chunks to servers in a round-robin cycling
+        pass
+
+    def exposed_list_files(self):
+        # list available files to search
+        pass
+
+    def exposed_remove_files(self):
+        # deletes a file from the server
+        pass
+
     def on_connect(self, conn):
         pass
 
