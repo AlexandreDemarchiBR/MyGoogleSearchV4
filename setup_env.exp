@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+# setup_env.exp 192.168.100.2
+
+set host [lindex $argv 0]
+set user "aluno"
+set password "aula321"
+
+puts "conectando em $host"
+spawn ssh $user@$host
+
+expect {
+    timeout {
+        puts "Connection timed out"
+        exit 1
+    }
+    -re "yes/no" {
+        puts "host desconhecido"
+        send "yes\r"
+        expect "assword:" {
+            send "$password\r" 
+            puts "$password enviado"
+        }
+    }
+    "assword:" {
+        send "$password\r"
+        puts "$password enviado"
+    }
+}
+expect "$ "
+
+send "mkdir MyGoogleSearchV4\r"
+puts "diretorio criado"
+# send git clone ...
+# send cd MyGoogleSearch
+# send python -m venv .
+#
+# send pip install -U rpyc
+send "exit\r"
+puts "fim do script"
+expect eof

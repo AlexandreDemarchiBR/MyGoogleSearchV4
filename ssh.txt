@@ -1,0 +1,2 @@
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+ssh-copy-id username@remote_host
