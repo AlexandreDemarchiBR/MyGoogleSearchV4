@@ -1,13 +1,13 @@
 import rpyc
 from itertools import cycle
 import os
-import pickle # usar pickle.HIGHEST_PROTOCOL
+import pickle  # usar pickle.HIGHEST_PROTOCOL
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
 class MainService(rpyc.Service):
-    metadata_file_per_worker = {} # maps workers to list of chunks in that server
-    metadata_worker_per_file = {} # maps a file to a list of servers that store chunks of it
+    metadata_file_per_worker = {}  # maps workers to list of chunks in that server
+    metadata_worker_per_file = {}  # maps a file to a list of servers that store chunks of it
 
     def __init__(self):
         # lock para atender 1 request por vez
@@ -28,13 +28,11 @@ class MainService(rpyc.Service):
                 self.metadata_worker_per_file = pickle.load(metadata)
         
         # criar conexões
-        
         self.conns = {}
         for worker in self.workers_list:
             c = rpyc.connect(worker, 18862)
             self.conns[worker] = c.root
 
-        
     def exposed_threaded_search_file(self, file_name, search_query):
         # process querys preventing multiple simultaneous query
         # each query will use all servers with all cores
@@ -46,24 +44,23 @@ class MainService(rpyc.Service):
                 }
                 results = {}
                 for future in future_to_worker:
-                    host, port = future_to_worker[future]
+                    worker = future_to_worker[future]
                     try:
                         result = future.result()
                     except Exception as exc:
-                        results[(host, port)] = f'Error: {exc}'
+                        results[worker] = f'Error: {exc}'
                     else:
-                        results[(host, port)] = result
+                        results[worker] = result
                 return results
     
     def call_worker(self, file_name, search_query, worker):
-        conn = rpyc.connect(worker, 18862)
-        results, total = conn.root.multiprocessed_search(file_name, search_query, 2)
-        conn.close()
+        conn = self.conns[worker]
+        results, total = conn.multiprocessed_search(file_name, search_query, 2)
         return results, total
 
     def exposed_distribute_file_chunks(self, input_file_path, chunk_size_mb=100):
         # divide file in chunks and send the chunks to servers in a round-robin cycling
-        chunk_size_bytes = 1024*1024*chunk_size_mb
+        chunk_size_bytes = 1024 * 1024 * chunk_size_mb
         file_index = 0
         current_chunk_size = 0
         current_chunk = []
@@ -76,14 +73,17 @@ class MainService(rpyc.Service):
                     # faz a chamada
                     chunk_name = f'{output_without_extension}_chunk{file_index}.jsonl'
                     worker = next(self.circular_queue)
-                    self.conns[worker].persist_chunk(self, output_dir, chunk_name, current_chunk)
+                    self.conns[worker].persist_chunk(output_dir, chunk_name, current_chunk)
                     file_index += 1
                     current_chunk_size = 0
                     current_chunk = []
-            current_chunk.append(line)
-            current_chunk_size = line_size + current_chunk_size
-
-
+                current_chunk.append(line)
+                current_chunk_size += line_size
+            # Persist the last chunk if it exists
+            if current_chunk:
+                chunk_name = f'{output_without_extension}_chunk{file_index}.jsonl'
+                worker = next(self.circular_queue)
+                self.conns[worker].persist_chunk(output_dir, chunk_name, current_chunk)
 
     def exposed_list_files(self):
         # list available files to search

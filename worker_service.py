@@ -83,8 +83,12 @@ class WorkerService(rpyc.Service):
                         json_list.append(json.loads(line))
             self.json_objects[dir] = json_list
 
-    def exposed_persist_chunk(self):
-        pass
+    def exposed_persist_chunk(self, output_dir, chunk_name, chunk):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(chunk_name, 'w', encoding='utf-8') as file:
+            for line in chunk:
+                file.write(line)
 
     def on_connect(self, conn):
         pass
