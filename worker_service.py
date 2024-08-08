@@ -101,4 +101,5 @@ class WorkerService(rpyc.Service):
 if __name__ == "__main__":
     from rpyc.utils.server import ThreadedServer
     t = ThreadedServer(WorkerService(), port=18862)
+    print("WorkerService listening on", 18862)
     t.start()

@@ -3,7 +3,7 @@
 # Check if the PID file exists
 if [ -f rpyc_worker.pid ]; then
     # Read the PID from the file
-    PID=$(cat rpyc_main.pid)
+    PID=$(cat rpyc_worker.pid)
     echo "Stopping Worker server with PID $PID..."
     
     # Kill the process

@@ -10,6 +10,7 @@ class MainService(rpyc.Service):
     metadata_worker_per_file = {} # maps a file to a list of servers that store chunks of it
 
     def __init__(self):
+        """
         # lock para atender 1 request por vez
         self.lock = threading.Lock()
         # carregando lista de workers
@@ -32,10 +33,10 @@ class MainService(rpyc.Service):
         self.conns = {}
         for worker in self.workers_list:
             c = rpyc.connect(worker, 18862)
-            self.conns[worker] = c.root
+            self.conns[worker] = c.root"""
 
         
-    def exposed_threaded_search_file(self, file_name, search_query):
+    def exposed_threaded_search_file(self, search_query, file_name):
         # process querys preventing multiple simultaneous query
         # each query will use all servers with all cores
         # one by one to avoid overloading
@@ -103,4 +104,5 @@ class MainService(rpyc.Service):
 if __name__ == "__main__":
     from rpyc.utils.server import ThreadedServer
     t = ThreadedServer(MainService(), port=18861)
+    print("MainService listening on", 18861)
     t.start()

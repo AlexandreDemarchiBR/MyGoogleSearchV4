@@ -22,17 +22,9 @@ class MyService(rpyc.Service):
 # ... continuing the code snippet from above ...
 
 
-'''
+
 if __name__ == "__main__":
     from rpyc.utils.server import ThreadedServer
-    
-    t = ThreadedServer(MyService, port=18861) # cada conexão tem seu proprio objeto
-
-    t = ThreadedServer(MyService(), port=18861) # toda conexão compartilha mesmo objeto
-
-    from rpyc.utils.helpers import classpartial
-    service = classpartial(MyService, 1, 2, pi=3)   # cada conexão tem seu próprio objeto
-    t = ThreadedServer(service, port=18861)         # mas com parametros passados pelo classpartial
+    t = ThreadedServer(MyService(), port=18861, auto_register=True) # toda conexão compartilha mesmo objeto
+    print("Listening on port", 18861)
     t.start()
-
-'''
