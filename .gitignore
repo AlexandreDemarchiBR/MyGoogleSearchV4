@@ -1,3 +1,6 @@
+#metadado da aplicação
+metadata_file_per_worker
+metadata_worker_per_file
 # venv
 # Virtualenv
 # http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
