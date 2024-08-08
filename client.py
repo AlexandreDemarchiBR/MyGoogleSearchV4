@@ -6,15 +6,27 @@ class Client:
         self.conn = self.conn.root
 
     def upload_file(self, file_name):
-        pass
+        self.conn.distribute_file_chunks(file_name, 5)
 
     def search_file(self, search_query, file_name='all'):
-        self.conn.threaded_search_file(self, file_name, search_query)
+        self.last_results = self.conn.threaded_search_file(self, file_name, search_query)
+        print("Resultados encontrados:", len(self.last_results))
 
     def list_files(self):
-        pass
+        list = self.conn.list_files()
+        for item in list:
+            print(item)
 
     def show_results(self):
+        message = 'Total de resultados: ' + len(self.last_results) + '\n\n'
+        for item in self.last_results:
+            title = item['title'] if isinstance(item['title'], str) else 'SEM TITULO'
+            description = item['description'] if isinstance(item['description'], str) else 'SEM DESCRIÇÃO'
+            url = item['url'] if isinstance(item['url'], str) else 'SEM LINK'
+            message += 'Título: ' + title + '\n' + 'Descrição: ' + description + '\n' + 'URL: ' + url + '\n\n'
+        print(message)
+
+    def remove_file(self, filename):
         pass
 
 if __name__ == "__main__":
